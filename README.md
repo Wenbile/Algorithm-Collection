@@ -453,6 +453,255 @@ return key % this.BASE
 };
 ```
 
+## 广度优先搜索/深度优先搜索
+### 图形渲染
+> 有一幅以二维整数数组表示的图画，每一个整数表示该图画的像素值大小，数值在 0 到 65535 之间。给你一个坐标 (sr, sc) 表示图像渲染开始的像素值（行 ，列）和一个新的颜色值 newColor，让你重新上色这幅图像。为了完成上色工作，从初始坐标开始，记录初始坐标的上下左右四个方向上像素值与初始坐标相同的相连像素点，接着再记录这四个方向上符合条件的像素点与他们对应四个方向上像素值与初始坐标相同的相连像素点，……，重复该过程。将所有有记录的像素点的颜色值改为新的颜色值。最后返回经过上色渲染后的图像。
+- 输入:
+- image = [[1,1,1],[1,1,0],[1,0,1]]
+- sr = 1, sc = 1, newColor = 2
+- 输出: [[2,2,2],[2,2,0],[2,0,1]]
+- 解析:
+- 在图像的正中间，(坐标(sr,sc)=(1,1)),
+- 在路径上所有符合条件的像素点的颜色都被更改成2。
+- 注意，右下角的像素没有更改为2，
+- 因为它不是在上下左右四个方向上与初始点相连的像素点。
+
+#### 深度优先搜索实现
+```js
+/**
+* 深度优先搜索
+* @param {number[][]} image
+* @param {number} sr
+* @param {number} sc
+* @param {number} newColor
+* @return {number[][]}
+  */
+  var floodFill = function(image, sr, sc, newColor) {
+  var rowLength = image.length,columLength = image[0].length
+  //记录原始值
+  var orginColor = image[sr][sc]
+  //如果原始值与新值一样，则不用作处理
+  if(orginColor == newColor){
+  return image
+  }
+
+  //每次判断当前值是否为原始值，如果为则替换成新值
+  //然后进行数组上下左右的值的递归
+  function dfs(row,colum){
+  if(image[row][colum]==orginColor){
+  image[row][colum] = newColor
+
+           if((row-1)>=0){
+               dfs(row-1,colum)
+           }
+
+           if((colum-1)>=0){
+               dfs(row,colum-1)
+           }
+
+
+           if((row+1)<rowLength){
+               dfs(row+1,colum)
+           }
+
+           if((colum+1)<columLength){
+               dfs(row,colum+1)
+           }
+
+       }
+  }
+
+  dfs(sr,sc)
+
+  return image
+  };
+```
+
+#### 广度优先搜索实现
+```javascript
+  /**
+* 广度优先搜索
+* @param {number[][]} image
+* @param {number} sr
+* @param {number} sc
+* @param {number} newColor
+* @return {number[][]}
+  */
+  var floodFill = function(image, sr, sc, newColor) {
+  var rowLength = image.length,columLength = image[0].length
+  //记录原始值
+  var orginColor = image[sr][sc]
+  //如果原始值与新值一样，则不用作处理
+  if(orginColor == newColor){
+  return image
+  }
+
+  var arr = new Array(1).fill([sr,sc])
+  let dx = [0,1,0,-1]//水平方向上右下左坐标
+  let dy = [-1,0,1,0]//垂直方向上右下左坐标
+
+  while(arr.length > 0){
+  let [row,colum] = arr[0]
+  image[row][colum] = newColor
+  arr.shift(0)
+  //4个方向都遍历，如果有和原始值一致的值，将其下标存入队列
+  for(var i=0;i<4;i++){
+  let rowOffset = row + dy[i],columOffset = colum + dx[i]
+  if(rowOffset>=0 && rowOffset<rowLength && columOffset>=0 && columOffset < columLength){
+  if(image[rowOffset][columOffset]==orginColor){
+  arr.push([rowOffset,columOffset])
+  }
+  }
+  }
+  }
+  return image
+  };
+```
+
+### 岛屿的最大面积
+#### 深度优先搜索
+```javascript
+/**
+* @param {number[][]} grid
+* @return {number}
+  */
+  var maxAreaOfIsland = function(grid) {
+  let rowLength = grid.length , columLength = grid[0].length
+  let dx = [0,1,0,-1]//水平方向上右下左坐标
+  let dy = [-1,0,1,0]//垂直方向上右下左坐标
+
+  var maxLength = 0
+
+  function dsf(row,colum){
+  if(grid[row][colum]==1){
+  var sum = 1
+  grid[row][colum] = 0
+  //4个方向都遍历，如果有和原始值一致的值，继续，否则回溯
+  for(let i=0;i<4;i++){
+  let rowOffset = row + dy[i],columOffset = colum + dx[i]
+  if(rowOffset>=0 && rowOffset<rowLength && columOffset>=0 && columOffset < columLength){
+  sum += dsf(rowOffset,columOffset)
+  }
+  }
+  return sum
+  }else{
+  return 0
+  }
+  }
+
+  for(var i = 0 ; i < rowLength ; i ++){
+  for(var j = 0 ; j < columLength;j++){
+  if(grid[i][j]==1){
+  maxLength = Math.max(maxLength,dsf(i,j))
+  }
+
+       }
+  }
+
+  return maxLength
+  };
+```
+
+### 填充每个节点的下一个右侧节点指针
+> 给定一个 完美二叉树 ，其所有叶子节点都在同一层，每个父节点都有两个子节点。
+- 填充它的每个 next 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 next 指针设置为 NULL。
+![img.png](img.png)
+
+#### 深度优先搜索
+```javascript
+/**
+ * // Definition for a Node.
+ * function Node(val, left, right, next) {
+ *    this.val = val === undefined ? null : val;
+ *    this.left = left === undefined ? null : left;
+ *    this.right = right === undefined ? null : right;
+ *    this.next = next === undefined ? null : next;
+ * };
+ */
+
+/**
+ * @param {Node} root
+ * @return {Node}
+ */
+var connect = function(root) {
+    if(root===null){
+        return root
+    }
+
+    function dfs(node){
+        if(node.left && node.right){
+            node.left.next = node.right
+            if(node.next){
+                node.right.next = node.next.left
+            }
+        }
+
+        if(node.left){
+            dfs(node.left)
+        }
+        if(node.right){
+            dfs(node.right)
+        }
+
+    }
+
+    dfs(root)
+
+    return root
+
+};
+```
+
+### 合并二叉树
+```
+输入: 
+	Tree 1                     Tree 2                  
+          1                         2                             
+         / \                       / \                            
+        3   2                     1   3                        
+       /                           \   \                      
+      5                             4   7                  
+输出: 
+合并后的树:
+	     3
+	    / \
+	   4   5
+	  / \   \ 
+	 5   4   7
+```
+#### 深度优先搜索算法，递归
+```javascript
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root1
+ * @param {TreeNode} root2
+ * @return {TreeNode}
+ */
+var mergeTrees = function(root1, root2) {
+    if(!root1){
+        return root2
+    }
+    if(!root2){
+        return root1
+    }
+    //定义根节点
+    var newTree = new TreeNode(root1.val+root2.val)
+    //递归
+    newTree.left = mergeTrees(root1.left,root2.left)
+    newTree.right = mergeTrees(root1.right,root2.right)
+    return newTree
+    
+};
+```
+
+
 ## 不交换中间变量交换两个数
 ```javascript
 var num1 = 20, num2 = 30
