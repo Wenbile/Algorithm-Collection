@@ -701,6 +701,124 @@ var mergeTrees = function(root1, root2) {
 };
 ```
 
+### 01矩阵 - 广度优先搜索
+![img_2.png](img_2.png)
+```javascript
+/**
+ * @param {number[][]} mat
+ * @return {number[][]}
+ */
+var updateMatrix = function(mat) {
+
+    let dr = [-1,0,1,0], dc = [0,1,0,-1]
+
+    let rLength = mat.length,cLength = mat[0].length
+
+    //遍历，将所有0的位置推进去
+    var stack = [] //队列
+    var record = new Set() //记录以计算完距离的数组
+    for(let r = 0 ; r < rLength ; r++){
+        for(let c = 0 ; c < cLength ; c++){
+            if(!mat[r][c]){
+                let arr = [r,c]
+                stack.push([r,c])
+                record.add(arr.toString())
+            }
+        }
+    }
+
+    while(stack.length){
+        //取出队列一个数
+        let [row,colum] = stack.shift(0)
+        let nowValue = mat[row][colum]
+        for(let i = 0 ; i < 4; i++){
+            let r = row + dr[i] , c = colum + dc[i]
+            let arr = [r,c]
+            if(r >= 0 && r < rLength && c >= 0 && c < cLength && !record.has(arr.toString())){
+                    mat[r][c] = nowValue + 1
+                    stack.push([r,c])
+                    record.add(arr.toString())    
+            }
+        }
+    }
+    return mat
+};
+```
+
+### 腐烂的橘子 - 广度优先搜索
+![img_1.png](img_1.png)
+```javascript
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+var orangesRotting = function(grid) {
+    let dr = [-1,0,1,0],dc = [0,1,0,-1]
+    let rowLength = grid.length,columLength = grid[0].length
+    let freshCount = 0
+    let stack = []
+    //先遍历一遍，将腐烂橘子位置加入数组，并计算新鲜橘子个数
+    for(let i = 0 ; i < rowLength; i++){
+        for(let j = 0 ; j < columLength; j++){
+            if(grid[i][j]==1){
+                freshCount += 1
+            }
+            if(grid[i][j]==2){
+                stack.push([i,j])
+            }
+        }
+    }
+
+    //新鲜橘子数=0，则腐烂时间0
+    if(!freshCount){
+        return 0
+    }
+
+    //如果腐烂橘子数=0，新鲜橘子数存在，则腐烂时间无穷
+    if(!stack.length&&freshCount){
+        return -1
+    }
+
+
+
+
+    
+    let overTime = 0
+    let overCnt = 0
+    while(stack.length){
+        let stackLength = stack.length
+        for(let j = 0 ; j < stackLength;j++){
+            let [row,colum] = stack.shift()
+            for(let i = 0 ; i < 4 ; i++){
+                let r = row+dr[i],c = colum+dc[i]
+                if(r>=0&&r<rowLength&&c>=0&&c<columLength){
+                  if(grid[r][c]==1){
+                    stack.push([r,c])
+                    grid[r][c] = 2
+                    overCnt += 1
+                    }
+                }
+            }
+        }
+
+        if(stack.length){
+            overTime += 1
+        }
+
+        
+        
+    }
+
+    if (overCnt!= freshCount){
+        return -1
+    }
+
+    return overTime
+
+
+};
+```
+
 
 ## 不交换中间变量交换两个数
 ```javascript
