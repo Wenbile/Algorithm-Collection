@@ -828,4 +828,71 @@ num2 = num1 - num2 // 50 - 30 = 20
 num1 = num1 - num2 // 50 - 20 = 30
 ```
 
+## 三数之和
+> https://leetcode-cn.com/problems/3sum
+
+```
+给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。
+```
+
+```javascript
+/**
+ * @param {number[]} nums
+ * @return {number[][]}
+ */
+var threeSum = function(nums) {
+    //排序+双指针
+    let mix0Arr = []
+    let len = nums.length
+    let backwardThirdIdx = len - 3
+    //数组长度小于3自己返回空数组
+    if(backwardThirdIdx<0)return mix0Arr
+    let sortNums = nums.sort((a,b)=>a-b)//排序
+    for(let x = 0 ; x <= len-3; x++){
+        //x大于0结束循环
+        if(sortNums[x]>0)break
+
+        //重复的x跳过
+        if(x > 0 &&sortNums[x]==sortNums[x-1]){
+            continue
+        }
+
+        //重置l、r
+        let l = x+1, r=len-1;
+
+        while(l<r){
+            let mix = sortNums[x] + sortNums[l] + sortNums[r]
+            if(mix==0){
+                mix0Arr.push([sortNums[x] , sortNums[l] , sortNums[r]])
+                //还可能有，如[0,-4,-3,3,4]//x=0时，就有[0,-4,4]和[0,-3,3]
+                l += 1
+                r -= 1
+                //跳过重复的l
+                while(l<r&&sortNums[l]==sortNums[l-1]){
+                    l += 1
+                }
+                //跳过重复的r
+                while(l<r&&sortNums[r]==sortNums[r+1]){
+                    r -= 1
+                }
+            }else if(mix < 0){
+                l += 1
+                //跳过重复的l
+                while(l<r&&sortNums[l]==sortNums[l-1]){
+                    l += 1
+                }
+            }else if(mix > 0){
+                r -= 1
+                //跳过重复的r
+                while(l<r&&sortNums[r]==sortNums[r+1]){
+                    r -= 1
+                }
+            }
+        }
+
+    }
+    return mix0Arr
+};
+```
+
 
