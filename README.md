@@ -896,3 +896,47 @@ var threeSum = function(nums) {
 ```
 
 
+## 分割等和子集
+> https://leetcode-cn.com/problems/partition-equal-subset-sum
+```
+给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。
+```
+```javascript
+/**
+ * @param {number[]} nums
+ * @return {boolean}
+ */
+var canPartition = function(nums) {
+    let numsLen = nums.length
+
+    //数组大于2个元素才能等
+    if(numsLen < 2) return false
+
+    //和为偶数才能等
+    let sum = nums.reduce((a,b)=>a+b,0)
+    if(sum & 1) return false
+
+    //初始化表格
+    let target = Math.floor(sum / 2)  //目标值为数组和的一半
+    //dp[i][j] i是从前i个商品中选，j是选出商品的总价值
+    let table = new Array(numsLen).fill(0).map(a=>new Array(target+1).fill(false))
+
+    //i为0，只选第一个商品时，只能是容积为j的背包填满
+    table[0][nums[0]] = true
+
+    for(let i = 1; i < numsLen; i++){
+        let num = nums[i]
+        for(let j = 1 ; j <= target; j++){
+            if(j>=num){
+                table[i][j] = table[i-1][j] | table[i-1][j-num]
+            }else{
+                table[i][j] = table[i-1][j]
+            }
+        }
+    }
+
+    return table[numsLen-1][target]
+
+
+};
+```
